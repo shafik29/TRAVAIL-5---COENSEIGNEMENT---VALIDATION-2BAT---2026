@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloisons de distribution – Vérification | 2nde Bâtiment</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0f2d56;
+  --navy-lt: #1a3f70;
+  --teal:    #007c8a;
+  --teal-lt: #e0f4f6;
+  --gold:    #b87400;
+  --gold-lt: #fff8e1;
+  --green:   #1e6e2e;
+  --green-lt:#e8f5e9;
+  --red:     #b71c1c;
+  --red-lt:  #ffebee;
+  --purple:  #4527a0;
+  --purple-lt:#ede7f6;
+  --bg:      #f0f4f8;
+  --grey-bd: #ccd3dc;
+  --text:    #1a1a2e;
+  --mono:    'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: #1a1a2e;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Page de démarrage ── */
+#splash {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3f70 50%, #0a4a6e 100%);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  padding: 2rem;
+}
+#splash .splash-card {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 20px;
+  padding: 3rem 3.5rem;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  backdrop-filter: blur(8px);
+}
+#splash .splash-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+#splash h1 { color: #fff; font-size: 1.6rem; font-weight: 700; margin-bottom: .5rem; }
+#splash .splash-sub { color: rgba(255,255,255,.7); font-size: .9rem; margin-bottom: .25rem; }
+#splash .splash-meta {
+  color: rgba(255,255,255,.5); font-size: .78rem;
+  margin-bottom: 2rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+  padding-top: .75rem; margin-top: .75rem;
+}
+#splash .badge-level {
+  display: inline-block;
+  background: rgba(0,200,180,.2);
+  border: 1px solid rgba(0,200,180,.4);
+  color: #7de0d8;
+  border-radius: 20px;
+  font-size: .75rem; font-weight: 600;
+  padding: 3px 12px;
+  margin-bottom: 1.5rem;
+}
+#splash .info-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: .75rem; margin-bottom: 2rem;
+  text-align: left;
+}
+#splash .info-item {
+  background: rgba(255,255,255,.08);
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  font-size: .82rem;
+  color: rgba(255,255,255,.8);
+}
+#splash .info-item i { color: #7de0d8; margin-right: 6px; }
+#splash .info-item strong { display: block; color: #fff; font-size: .85rem; margin-top: 2px; }
+.btn-start {
+  background: linear-gradient(135deg, var(--teal), #009aaa);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 14px 40px; font-size: 1rem; font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer; width: 100%;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 4px 20px rgba(0,124,138,.4);
+}
+.btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,124,138,.5); }
+.btn-start i { margin-right: 8px; }
+
+/* ── App shell (caché jusqu'au clic) ── */
+#app { display: none; flex-direction: column; flex: 1; }
+
+/* ── Header sticky ── */
+#app-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+  color: #fff;
+  padding: 12px 24px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 3px 16px rgba(0,0,0,.25);
+}
+#app-header h1 { font-size: 1rem; font-weight: 700; margin: 0; }
+#app-header p { font-size: .75rem; opacity: .75; margin: 0; }
+.score-badge {
+  background: rgba(255,255,255,.15);
+  border: 1.5px solid rgba(255,255,255,.3);
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-family: var(--mono); font-size: .85rem; font-weight: 700;
+  min-width: 120px; text-align: center; white-space: nowrap;
+}
+.progress-bar-hdr { height: 3px; background: rgba(255,255,255,.2); border-radius: 99px; overflow:hidden; margin-top:5px; }
+.progress-fill { height: 100%; background: #7de0d8; border-radius: 99px; transition: width .4s; width: 0%; }
+
+/* ── Main content ── */
+#app-main { flex: 1; max-width: 940px; margin: 0 auto; width: 100%; padding: 24px 16px 40px; }
+
+/* ── Context box ── */
+.context-box {
+  background: #fff;
+  border-left: 5px solid var(--teal);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  font-size: .875rem; line-height: 1.7;
+  box-shadow: 0 1px 6px rgba(0,0,0,.06);
+}
+.context-box strong { color: var(--navy); }
+.tag-info {
+  display: inline-block; background: var(--teal-lt); color: #005260;
+  border-radius: 5px; padding: 2px 9px; font-size: .78rem; font-weight: 600;
+}
+
+/* ── Étape card ── */
+.etape {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  margin-bottom: 22px;
+  overflow: hidden;
+  position: relative;
+}
+.etape-header {
+  background: var(--navy); color: #fff;
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.etape-num {
+  background: var(--teal); border-radius: 50%;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .82rem; flex-shrink: 0;
+}
+.etape-title { font-size: .95rem; font-weight: 600; flex: 1; }
+.etape-pts {
+  font-family: var(--mono); font-size: .78rem;
+  background: rgba(255,255,255,.15);
+  padding: 3px 10px; border-radius: 5px;
+}
+.etape-body { padding: 18px 20px; }
+
+/* ── Section title ── */
+.section-title {
+  font-size: .84rem; font-weight: 700; color: var(--navy);
+  padding-bottom: 6px; margin: 20px 0 12px;
+  border-bottom: 2px solid; display: flex; align-items: center; gap: 7px;
+}
+.section-title:first-child { margin-top: 0; }
+.st-teal   { border-color: var(--teal); }
+.st-green  { border-color: var(--green); }
+.st-gold   { border-color: var(--gold); }
+.st-purple { border-color: var(--purple); }
+.st-red    { border-color: var(--red); }
+
+/* ── Aide ── */
+.aide {
+  background: var(--gold-lt);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 9px 13px;
+  font-size: .83rem; color: #5a3800;
+  margin-bottom: 14px; line-height: 1.6;
+}
+
+/* ── Schéma chaîne ── */
+.chaine {
+  display: flex; align-items: stretch;
+  margin: 10px 0 18px;
+  border: 1px solid #dde2ea;
+  border-radius: 10px;
+  overflow: hidden; font-size: .78rem;
+}
+.ch-step {
+  flex: 1; padding: 10px 6px; text-align: center;
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  min-width: 70px;
+}
+.ch-step .ch-lbl { font-weight: 700; font-size: .8rem; }
+.ch-step .ch-sub { font-size: .7rem; opacity: .7; }
+.ch-sep {
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px 3px; min-width: 38px;
+  border-left: 1px solid #dde2ea; border-right: 1px solid #dde2ea;
+  font-size: .68rem; font-weight: 700; line-height: 1.3; text-align: center;
+}
+
+/* ── Tableau ── */
+.table-wrap { overflow-x: auto; margin: 8px 0 12px; }
+table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+th {
+  background: var(--navy); color: #fff;
+  padding: 9px 10px; text-align: center;
+  font-weight: 600; white-space: nowrap; font-size: .8rem;
+}
+td {
+  padding: 7px 9px; border: 1px solid #dde2ea;
+  text-align: center; vertical-align: middle;
+}
+tr:nth-child(even) td { background: #f8f9fc; }
+td.lc { text-align: left; font-weight: 500; }
+.tot-row td { font-weight: 700; background: var(--green-lt) !important; border-top: 2px solid var(--green); }
+
+/* ── Cell with input + icon ── */
+.cell-wrap { display: flex; align-items: center; justify-content: center; gap: 5px; }
+.cell-wrap input {
+  width: 84px; padding: 4px 7px;
+  border: 1.5px solid #ccd3dc; border-radius: 6px;
+  font-family: var(--mono); font-size: .82rem;
+  background: #fff; color: #1a1a2e; text-align: center;
+}
+.cell-wrap input:focus { outline: none; border-color: var(--teal); }
+.cell-wrap input.ok { border-color: var(--green); background: #f0faf0; }
+.cell-wrap input.ko { border-color: var(--red); background: #fff5f5; }
+.icon { font-size: .95rem; min-width: 18px; text-align: center; }
+
+/* ── Bouton check ── */
+.btn-verif {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #fff; color: var(--navy);
+  border: 1.5px solid var(--navy); border-radius: 7px;
+  padding: 5px 12px; font-family: 'Inter', sans-serif;
+  font-size: .79rem; font-weight: 600; cursor: pointer;
+  transition: background .15s, color .15s;
+  margin-top: 8px;
+}
+.btn-verif:hover { background: var(--navy); color: #fff; }
+
+/* ── Ligne de calcul ── */
+.calc-row {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 8px; margin: 10px 0 6px;
+}
+.calc-row .lbl { font-size: .83rem; color: #555; min-width: 130px; }
+.eq { font-size: 1.1rem; color: #999; }
+.inp-lg {
+  border: 2px solid #ccd3dc; border-radius: 7px;
+  padding: 7px 10px; font-family: var(--mono); font-size: .9rem;
+  width: 125px; background: #fff; color: #1a1a2e;
+  transition: border-color .2s;
+}
+.inp-lg:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,124,138,.12); }
+.inp-lg.ok { border-color: var(--green); background: #f0faf0; }
+.inp-lg.ko { border-color: var(--red); background: #fff5f5; }
+.unit { font-size: .8rem; color: #777; }
+.icon-lg { font-size: 1.2rem; }
+
+/* ── Coeff block ── */
+.coeff-block {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  background: #f8f9fc;
+  border: 1px solid #dde2ea; border-radius: 9px;
+  padding: 12px 15px; margin-bottom: 12px;
+}
+.coeff-label { font-size: .83rem; color: #444; flex: 1; min-width: 200px; }
+.coeff-label strong { color: var(--navy); }
+.coeff-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.coeff-eq { font-size: .83rem; color: #666; font-family: var(--mono); }
+
+/* ── Feedback ── */
+.fb {
+  display: none; margin-top: 8px;
+  padding: 9px 13px; border-radius: 8px;
+  font-size: .85rem; line-height: 1.55;
+  animation: fadeIn .2s ease;
+}
+.fb.ok { background: var(--green-lt); border-left: 4px solid var(--green); color: #1b5e20; display: flex; align-items: flex-start; gap: 7px; }
+.fb.ko { background: var(--red-lt); border-left: 4px solid var(--red); color: #7f1a1a; display: flex; align-items: flex-start; gap: 7px; }
+.fb-icon { flex-shrink: 0; }
+
+/* ── Synthèse ── */
+.synth-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+  gap: 10px; margin: 10px 0;
+}
+.synth-card { border-radius: 10px; padding: 12px 14px; text-align: center; }
+.sc-lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.sc-val { font-size: 1.15rem; font-weight: 700; font-family: var(--mono); }
+.sc-sub { font-size: .72rem; margin-top: 2px; opacity: .75; }
+
+/* ── Bouton valider ── */
+.btn-validate {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--navy); color: #fff;
+  border: none; border-radius: 9px;
+  padding: 11px 24px; font-family: 'Inter', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  cursor: pointer; transition: background .2s, transform .1s;
+  margin-top: 18px;
+}
+.btn-validate:hover { background: var(--navy-lt); transform: translateY(-1px); }
+
+/* ── Bilan ── */
+#bilan {
+  display: none;
+  background: linear-gradient(135deg, var(--navy), #1a3f70);
+  color: #fff; border-radius: 14px;
+  padding: 28px 30px; margin-top: 10px;
+  text-align: center; animation: fadeIn .3s ease;
+  box-shadow: 0 8px 32px rgba(15,45,86,.3);
+}
+#bilan h2 { font-size: 1.3rem; margin-bottom: 8px; }
+.big-score { font-size: 3rem; font-weight: 700; font-family: var(--mono); color: #7de0d8; }
+.btn-bilan {
+  display: inline-block; margin-top: 18px;
+  background: var(--teal); color: #fff;
+  border: none; border-radius: 9px; padding: 11px 28px;
+  font-family: 'Inter', sans-serif; font-size: .92rem; font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Overlay lock ── */
+.overlay-lock {
+  position: absolute; inset: 0;
+  background: rgba(240,244,248,.88);
+  z-index: 10; display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; backdrop-filter: blur(3px);
+}
+.overlay-lock-msg {
+  text-align: center; color: var(--navy);
+  font-size: .9rem; font-weight: 600;
+  background: rgba(255,255,255,.7);
+  border: 1px solid #ccd3dc;
+  border-radius: 10px; padding: 14px 22px;
+}
+
+/* ── Footer ── */
+footer {
+  background: var(--navy);
+  color: rgba(255,255,255,.75);
+  padding: 20px 24px;
+  font-size: .78rem; line-height: 1.6;
+  margin-top: auto;
+}
+footer strong { color: rgba(255,255,255,.95); }
+footer .cc-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 6px; padding: 4px 10px;
+  font-size: .75rem; margin-top: 6px;
+  color: rgba(255,255,255,.85);
+}
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:600px){
+  .calc-row { flex-direction: column; align-items: flex-start; }
+  .coeff-block { flex-direction: column; align-items: flex-start; }
+  #splash .splash-card { padding: 2rem 1.5rem; }
+  #splash .info-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ PAGE DE DÉMARRAGE ══════════ -->
+<div id="splash">
+  <div class="splash-card">
+    <div class="splash-icon">🧱</div>
+    <h1>Cloisons de distribution</h1>
+    <p class="splash-sub">Vérification des calculs — Étapes 3 &amp; 4</p>
+    <div class="badge-level">Coenseignement Maths / Bâtiment · Classe de Seconde</div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <i class="bi bi-layers"></i>
+        <strong>Étape 3 — Quantitatif</strong>
+        Calcul des quantités de matériaux à commander
+      </div>
+      <div class="info-item">
+        <i class="bi bi-calculator"></i>
+        <strong>Étape 4 — Coûts</strong>
+        Frais de chantier, frais généraux, TVA → Prix TTC
+      </div>
+      <div class="info-item">
+        <i class="bi bi-file-earmark-text"></i>
+        <strong>Prérequis</strong>
+        Avoir complété la fiche papier (étapes 1 &amp; 2)
+      </div>
+      <div class="info-item">
+        <i class="bi bi-clock"></i>
+        <strong>Durée</strong>
+        Environ 30 à 40 minutes
+      </div>
+    </div>
+
+    <button class="btn-start" onclick="startApp()">
+      <i class="bi bi-check2-circle"></i>
+      Valider mon travail en ligne
+    </button>
+  </div>
+</div>
+
+<!-- ══════════ APPLICATION PRINCIPALE ══════════ -->
+<div id="app">
+
+  <!-- Header sticky -->
+  <header id="app-header">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <h1 class="mb-0"><i class="bi bi-building me-2"></i>Vérification — Étapes 3 &amp; 4</h1>
+        <p class="mb-0">Cloisons de distribution · Coenseignement Maths / Bâtiment · Seconde</p>
+      </div>
+      <div>
+        <div class="score-badge" id="score-badge">0 / 0 pts</div>
+        <div class="progress-bar-hdr"><div class="progress-fill" id="pf"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenu principal -->
+  <main id="app-main">
+<div class="context-box" id="context-box">
+  <strong>Rappel de la situation :</strong> cloison <strong>72/48</strong> · L = 6,50 m · H = 2,70 m · porte 0,93 × 2,04 m<br>
+  <small style="color:#555;font-size:.82rem">⚠️ Pour toute la suite, arrondir les résultats à <strong>0,01 m²</strong> (2 décimales).</small><br><br>
+  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:2px">
+    <span>Surface nette calculée sur la fiche papier (étape 2) ≈</span>
+    <input type="number" id="saisie_sn" step="0.01" min="0" max="25"
+      style="width:100px;padding:6px 10px;border:2px solid #ccd3dc;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.95rem;background:#fff;color:#1a1a2e"
+      placeholder="">
+    <span>m²</span>
+    <button class="btn-verif" onclick="validerSurface()" id="btn-sn">✔ Valider ma surface</button>
+    <span id="icon-sn" style="font-size:1.1rem"></span>
+  </div>
+  <div class="fb" id="fb-sn" style="margin-top:8px"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ÉTAPE 3 — Quantitatif
+══════════════════════════════════════════════ -->
+<div class="etape" id="etape3-card" style="position:relative">
+  <!-- Overlay verrouillage -->
+  <div id="lock3" style="position:absolute;inset:0;background:rgba(238,242,247,.82);z-index:10;display:flex;align-items:center;justify-content:center;border-radius:10px;backdrop-filter:blur(2px)">
+    <div style="text-align:center;color:var(--navy);font-size:.92rem;font-weight:600">
+      🔒 Saisissez et validez votre surface nette ci-dessus pour déverrouiller.
+    </div>
+  </div>
+  <div class="etape-header">
+    <div class="etape-num">3</div>
+    <div class="etape-title">Quantitatif des matériaux</div>
+    <div class="etape-pts">/ 5 pts</div>
+  </div>
+  <div class="etape-body">
+
+    <div class="aide">
+      💡 <strong>Rappel :</strong> Quantité totale = Quantité/m² (ratio) × Surface nette (<span id="aide3-sn">—</span>).
+      Pour la <strong>commande</strong> : arrondir à l'unité supérieure selon le conditionnement.
+      Saisissez vos réponses puis cliquez <em>Vérifier</em> sur chaque ligne.
+    </div>
+
+    <div class="table-wrap">
+      <table id="tab3">
+        <thead>
+          <tr>
+            <th>Produit</th><th>U</th><th>Quantité/m² (ratio)</th><th>Surface nette</th>
+            <th>Qté totale</th><th></th>
+            <th>Conditionnement</th>
+            <th>Commande</th><th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tab3-body">
+          <!-- généré par JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="fb" id="fb_etape3"></div>
+    <button class="btn-validate" onclick="validerEtape3()">✔ Valider l'étape 3</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ÉTAPE 4 — Coûts
+══════════════════════════════════════════════ -->
+<div class="etape" id="etape4-card" style="position:relative">
+  <!-- Overlay verrouillage -->
+  <div id="lock4" style="position:absolute;inset:0;background:rgba(238,242,247,.82);z-index:10;display:flex;align-items:center;justify-content:center;border-radius:10px;backdrop-filter:blur(2px)">
+    <div style="text-align:center;color:var(--navy);font-size:.92rem;font-weight:600">
+      🔒 Saisissez et validez votre surface nette ci-dessus pour déverrouiller.
+    </div>
+  </div>
+  <div class="etape-header">
+    <div class="etape-num">4</div>
+    <div class="etape-title">Calculer le coût de revient et le prix TTC</div>
+    <div class="etape-pts">/ 8 pts</div>
+  </div>
+  <div class="etape-body">
+
+    <!-- Schéma chaîne des coûts (conforme sujet AFB) -->
+    <div class="chaine">
+      <div class="ch-step" style="background:#e3f2fd"><div class="ch-lbl" style="color:#0d47a1">Coût HT</div><div class="ch-sub" style="color:#0d47a1">matériaux</div></div>
+      <div class="ch-sep" style="font-size:.68rem;font-weight:700;color:#1b5e20;background:#e8f5e9;padding:4px 3px;text-align:center;line-height:1.3;min-width:40px">+&nbsp;Frais<br>chantier<br>7,5&nbsp;%</div>
+      <div class="ch-step" style="background:#e8f5e9"><div class="ch-lbl" style="color:#1b5e20">Coût de<br>réalisation</div></div>
+      <div class="ch-sep" style="font-size:.68rem;font-weight:700;color:#4527a0;background:var(--purple-lt);padding:4px 3px;text-align:center;line-height:1.3;min-width:40px">+&nbsp;Frais<br>généraux<br>32&nbsp;%</div>
+      <div class="ch-step" style="background:var(--purple-lt)"><div class="ch-lbl" style="color:#4527a0">Prix de<br>revient HT</div></div>
+      <div class="ch-sep" style="font-size:.68rem;font-weight:700;color:#6d4c00;background:var(--gold-lt);padding:4px 3px;text-align:center;line-height:1.3;min-width:40px">+&nbsp;TVA<br>10&nbsp;%</div>
+      <div class="ch-step" style="background:var(--teal-lt)"><div class="ch-lbl" style="color:#004d56;font-size:.85rem">Prix TTC</div><div class="ch-sub" style="color:#004d56">payé par client</div></div>
+    </div>
+
+    <!-- ── A : Coût HT matériaux ──────────────────────────── -->
+    <div class="section-title st-teal">A — Coût total HT des matériaux commandés</div>
+    <div class="aide">Calculez le coût HT de chaque article (quantité commandée × prix unitaire HT), puis le total. Vérifiez ligne par ligne.</div>
+    <div class="table-wrap">
+      <table id="tab4a">
+        <thead>
+          <tr><th>Produit</th><th>Unité</th><th>Prix unitaire HT</th><th>Qté cmd.</th><th>Coût HT (€)</th><th></th></tr>
+        </thead>
+        <tbody id="tab4a-body"><!-- JS --></tbody>
+      </table>
+    </div>
+    <div class="fb" id="fb_ht_tot"></div>
+
+    <!-- ── B : Frais de chantier 7,5 % ───────────────────── -->
+    <div class="section-title st-green" style="margin-top:20px">B — Frais de chantier : 7,5 % du coût HT</div>
+    <div class="aide">Les frais de chantier représentent <strong>7,5 %</strong> du coût HT des matériaux (installation, sécurité, nettoyage…). Trouvez le coefficient multiplicateur, puis calculez le coût de réalisation.</div>
+
+    <div class="coeff-block">
+      <div class="coeff-label">
+        Quel coefficient multiplicateur permet d'<strong>ajouter 7,5 %</strong> ?<br>
+        <span style="font-size:.78rem;color:#777">Rappel : ajouter p % → multiplier par (1 + p/100)</span>
+      </div>
+      <div class="coeff-right">
+        <span class="coeff-eq">Coefficient =</span>
+        <input class="inp-lg" id="coeff_fc" style="width:90px" type="number" step="0.001" min="0" max="2">
+        <button class="btn-verif" onclick="checkCoeff4('fc')">✔ Vérifier</button>
+        <span class="icon-lg" id="icon_coeff_fc"></span>
+      </div>
+    </div>
+    <div class="fb" id="fb_coeff_fc"></div>
+
+    <div class="calc-row">
+      <div class="lbl">Coût HT =</div>
+      <input class="inp-lg" id="inp_cout_ht" type="number" step="0.01" min="0">
+      <span class="unit">€</span>
+      <span class="eq">×</span>
+      <input class="inp-lg" id="inp_coeff_fc" style="width:90px" type="number" step="0.001" min="0" max="2">
+      <span class="eq">=</span>
+      <input class="inp-lg" id="res_cr" type="number" step="0.01" min="0">
+      <span class="unit">€ (coût de réalisation)</span>
+      <button class="btn-verif" onclick="checkCalc4('cr')">✔ Vérifier</button>
+      <span class="icon-lg" id="icon_res_cr"></span>
+    </div>
+    <div class="fb" id="fb_res_cr"></div>
+
+    <!-- ── C : Frais généraux 32 % ────────────────────────── -->
+    <div class="section-title st-purple" style="margin-top:20px">C — Frais généraux : 32 % du coût de réalisation</div>
+    <div class="aide">Les frais généraux (loyer, salaires administratifs, véhicules…) représentent <strong>32 %</strong> du coût de réalisation. Trouvez le coefficient multiplicateur, puis calculez le prix de revient HT.</div>
+
+    <div class="coeff-block">
+      <div class="coeff-label">
+        Quel coefficient multiplicateur permet d'<strong>ajouter 32 %</strong> ?<br>
+        <span style="font-size:.78rem;color:#777">Rappel : ajouter p % → multiplier par (1 + p/100)</span>
+      </div>
+      <div class="coeff-right">
+        <span class="coeff-eq">Coefficient =</span>
+        <input class="inp-lg" id="coeff_fg" style="width:90px" type="number" step="0.01" min="0" max="3">
+        <button class="btn-verif" onclick="checkCoeff4('fg')">✔ Vérifier</button>
+        <span class="icon-lg" id="icon_coeff_fg"></span>
+      </div>
+    </div>
+    <div class="fb" id="fb_coeff_fg"></div>
+
+    <div class="calc-row">
+      <div class="lbl">Coût réalisation =</div>
+      <input class="inp-lg" id="inp_cr" type="number" step="0.01" min="0">
+      <span class="unit">€</span>
+      <span class="eq">×</span>
+      <input class="inp-lg" id="inp_coeff_fg" style="width:90px" type="number" step="0.01" min="0" max="3">
+      <span class="eq">=</span>
+      <input class="inp-lg" id="res_pr" type="number" step="0.01" min="0">
+      <span class="unit">€ (prix de revient HT)</span>
+      <button class="btn-verif" onclick="checkCalc4('pr')">✔ Vérifier</button>
+      <span class="icon-lg" id="icon_res_pr"></span>
+    </div>
+    <div class="fb" id="fb_res_pr"></div>
+
+    <!-- ── D : TVA 10 % ───────────────────────────────────── -->
+    <div class="section-title st-gold" style="margin-top:20px">D — TVA 10 % → Prix TTC</div>
+    <div class="aide">La TVA dans le bâtiment est de <strong>10 %</strong>. Trouvez le coefficient multiplicateur, puis calculez le prix TTC payé par le client.</div>
+
+    <div class="coeff-block">
+      <div class="coeff-label">
+        Quel coefficient multiplicateur correspond à une <strong>augmentation de 10 %</strong> ?<br>
+        <span style="font-size:.78rem;color:#777">Rappel : ajouter t % → multiplier par (1 + t/100)</span>
+      </div>
+      <div class="coeff-right">
+        <span class="coeff-eq">Coefficient =</span>
+        <input class="inp-lg" id="coeff_tva" style="width:90px" type="number" step="0.01" min="0" max="3">
+        <button class="btn-verif" onclick="checkCoeff4('tva')">✔ Vérifier</button>
+        <span class="icon-lg" id="icon_coeff_tva"></span>
+      </div>
+    </div>
+    <div class="fb" id="fb_coeff_tva"></div>
+
+    <div class="calc-row">
+      <div class="lbl">Prix revient HT =</div>
+      <input class="inp-lg" id="inp_pr" type="number" step="0.01" min="0">
+      <span class="unit">€</span>
+      <span class="eq">×</span>
+      <input class="inp-lg" id="inp_coeff_tva" style="width:90px" type="number" step="0.01" min="0" max="3">
+      <span class="eq">=</span>
+      <input class="inp-lg" id="res_ttc" type="number" step="0.01" min="0">
+      <span class="unit">€ TTC</span>
+      <button class="btn-verif" onclick="checkCalc4('ttc')">✔ Vérifier</button>
+      <span class="icon-lg" id="icon_res_ttc"></span>
+    </div>
+    <div class="fb" id="fb_res_ttc"></div>
+
+    <!-- ── Synthèse ──────────────────────────────────────── -->
+    <div class="section-title st-teal" style="margin-top:22px">Synthèse</div>
+    <div class="synth-grid">
+      <div class="synth-card" style="background:#e3f2fd;border:1px solid #90caf9">
+        <div class="sc-lbl" style="color:#0d47a1">Coût HT matériaux</div>
+        <div class="sc-val" style="color:#0d47a1" id="syn-ht">—</div>
+      </div>
+      <div class="synth-card" style="background:#e8f5e9;border:1px solid #a5d6a7">
+        <div class="sc-lbl" style="color:#1b5e20">Coût de réalisation</div>
+        <div class="sc-val" style="color:#1b5e20" id="syn-cr">—</div>
+        <div class="sc-sub" style="color:#1b5e20">frais chantier inclus</div>
+      </div>
+      <div class="synth-card" style="background:var(--purple-lt);border:1px solid #b39ddb">
+        <div class="sc-lbl" style="color:#4527a0">Prix de revient HT</div>
+        <div class="sc-val" style="color:#4527a0" id="syn-pr">—</div>
+        <div class="sc-sub" style="color:#4527a0">frais généraux inclus</div>
+      </div>
+      <div class="synth-card" style="background:var(--teal-lt);border:1px solid #80cbc4">
+        <div class="sc-lbl" style="color:#004d56">Prix TTC client</div>
+        <div class="sc-val" style="color:#004d56" id="syn-ttc">—</div>
+      </div>
+    </div>
+
+    <div class="fb" id="fb_etape4"></div>
+    <button class="btn-validate" onclick="validerEtape4()">✔ Valider l'étape 4</button>
+  </div>
+</div>
+
+<!-- Bilan final -->
+<div id="bilan">
+  <h2>🎉 Activité terminée !</h2>
+  <div class="big-score" id="bilan-score">—</div>
+  <p id="bilan-msg"></p>
+  <button class="btn-bilan" onclick="resetAll()">↩ Recommencer</button>
+</div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+      <div>
+        <strong>M. BEN AHMED</strong> — Professeur de mathématiques et de sciences physiques<br>
+        Lycée Léon Chiris · Grasse · <strong>Académie de Nice</strong>
+      </div>
+      <div class="text-md-end">
+        <div class="cc-badge">
+          <i class="bi bi-c-circle"></i>
+          CC BY-NC-ND — Attribution · Pas d'utilisation commerciale · Pas de modification
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- #app -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function startApp(){
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  buildTab3();
+  buildTab4A();
+  updateScore();
+}
+// ── Données de référence ─────────────────────────────────────────
+const SN = 15.65;     // surface nette arrondie à 0,01 m² (valeur de référence)
+let SN_ELEVE = null;  // surface saisie par l'élève, utilisée dans le tableau
+
+// ── Valider la surface nette saisie ──────────────────────────────
+function validerSurface(){
+  const v = +document.getElementById('saisie_sn').value;
+  const ok = near(v, SN, 0.005);
+  const inp = document.getElementById('saisie_sn');
+  const ic  = document.getElementById('icon-sn');
+  const fb  = document.getElementById('fb-sn');
+
+  inp.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  inp.style.background  = ok ? '#f1f8f1' : '#fff5f5';
+  ic.textContent = ok ? '✅' : '❌';
+  fb.style.display = 'flex';
+  fb.className = 'fb ' + (ok ? 'ok' : 'ko');
+
+  if(ok){
+    SN_ELEVE = v;
+    fb.innerHTML = `<span class="fb-icon">✅</span><span>Surface nette validée : <strong>${v.toFixed(2).replace('.',',')} m²</strong>. Les étapes 3 et 4 sont déverrouillées. Utilisez cette valeur pour tous vos calculs.</span>`;
+    // Déverrouiller les étapes
+    document.getElementById('lock3').style.display = 'none';
+    document.getElementById('lock4').style.display = 'none';
+    document.getElementById('btn-sn').disabled = true;
+    // Mettre à jour la colonne Surface dans le tableau déjà construit
+    document.querySelectorAll('.sn-cell').forEach(td => {
+      td.textContent = v.toFixed(2).replace('.',',') + ' m²';
+    });
+    // Mettre à jour l'aide de l'étape 3
+    const aide3 = document.getElementById('aide3-sn');
+    if(aide3) aide3.textContent = v.toFixed(2).replace('.',',') + ' m²';
+    // Recalculer les références avec la valeur élève pour validation souple
+    // (on garde SN interne pour les checks, la valeur affichée est indicative)
+  } else {
+    fb.innerHTML = `<span class="fb-icon">❌</span><span>Valeur incorrecte. Vérifiez votre calcul de l'étape 2 : pensez à calculer la surface totale en premier, puis à soustraire la surface de l'ouverture.</span>`;
+  }
+}
+
+const PRODUITS3 = [
+  {nom:'Plaque de plâtre',   u:'m²',   ratio:2.1,  ref_qty:SN*2.1,  cond:'Palette 150 m²',   cond_unit:150, ref_cmd:1},
+  {nom:'Rail R48',           u:'m',    ratio:0.9,  ref_qty:SN*0.9,  cond:'Paquet 30 m',       cond_unit:30,  ref_cmd:1},
+  {nom:'Montant M48',        u:'m',    ratio:2.1,  ref_qty:SN*2.1,  cond:'Paquet 30 m',       cond_unit:30,  ref_cmd:2},
+  {nom:'Vis TTPC',           u:'u',    ratio:22,   ref_qty:SN*22,   cond:'Boîte 1 000',       cond_unit:1000,ref_cmd:1},
+  {nom:'Isolant laine min.', u:'m²',   ratio:'—',  ref_qty:null,    cond:'Rouleau 10 m²',     cond_unit:10,  ref_cmd:2, prefill:true},
+  {nom:'Bande à joint',      u:'m',    ratio:2.8,  ref_qty:SN*2.8,  cond:'Rouleau 150 m',     cond_unit:150, ref_cmd:1},
+  {nom:'Enduit poudre PR',   u:'kg',   ratio:0.66, ref_qty:SN*0.66, cond:'Sac 25 kg',         cond_unit:25,  ref_cmd:1},
+];
+
+let totalPts=0, earnedPts=0, e3done=false, e4done=false;
+
+function near(v,ref,tol){return Math.abs(v-ref)<=tol}
+// Accepte arrondi 2 dec, 1 dec ou entier supérieur (ceil)
+function okVal(v,ref){
+  if(!ref || ref<=0) return false;
+  const r2 = Math.round(ref*100)/100;
+  const r1 = Math.round(ref*10)/10;
+  const r0 = Math.ceil(ref);
+  return (v===r2 || v===r1 || v===r0);
+}
+function fmt(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'}
+
+function updateScore(){
+  const tot = totalPts, earn = earnedPts;
+  document.getElementById('score-badge').textContent = earn.toFixed(1)+' / '+tot.toFixed(1)+' pts';
+  document.getElementById('pf').style.width = (tot>0?(earn/tot)*100:0)+'%';
+}
+
+// ── Construire tableau étape 3 ─────────────────────────────────
+function buildTab3(){
+  const tb = document.getElementById('tab3-body');
+  PRODUITS3.forEach((p,i)=>{
+    const r = document.createElement('tr');
+    if(p.prefill){
+      // Ligne pré-remplie (isolant) — grisée, non modifiable
+      r.style.background = '#f0f4f8';
+      r.innerHTML = `
+        <td class="lc" style="color:#666">${p.nom}</td>
+        <td style="color:#888">${p.u}</td>
+        <td style="color:#888">—</td>
+        <td class="sn-cell" style="color:#888">—</td>
+        <td style="color:#555;font-style:italic;font-size:.82rem" colspan="2">selon surface nette</td>
+        <td style="color:#666">${p.cond}</td>
+        <td style="font-weight:600;color:var(--teal);text-align:center">2 rouleaux</td>
+        <td colspan="2"><span style="font-size:.75rem;color:#888;font-style:italic">ℹ pré-rempli</span></td>
+      `;
+    } else {
+      r.innerHTML = `
+        <td class="lc">${p.nom}</td>
+        <td>${p.u}</td>
+        <td>${p.ratio.toString().replace('.',',')}</td>
+        <td class="sn-cell" style="font-weight:600;color:var(--teal)">—</td>
+        <td><div class="cell-wrap"><input type="number" id="q3q_${i}" step="0.01" min="0"><span class="icon" id="ic3q_${i}"></span></div></td>
+        <td><button class="btn-verif" onclick="checkRow3(${i})">✔</button></td>
+        <td>${p.cond}</td>
+        <td><div class="cell-wrap"><input type="number" id="q3c_${i}" step="1" min="0"><span class="icon" id="ic3c_${i}"></span></div></td>
+        <td></td>
+        <td><span class="icon" id="ic3row_${i}"></span></td>
+      `;
+    }
+    tb.appendChild(r);
+  });
+}
+
+// ── Vérifier une ligne du tableau 3 ───────────────────────────
+function checkRow3(i){
+  const p = PRODUITS3[i];
+  if(p.prefill) return;
+  const vq = +document.getElementById('q3q_'+i).value;
+  const vc = +document.getElementById('q3c_'+i).value;
+
+  // Quantité totale : accepter arrondi 2 dec, 1 dec, ou ceil (unité supérieure)
+  const r2  = Math.round(p.ref_qty * 100) / 100;   // 2 décimales
+  const r1  = Math.round(p.ref_qty * 10)  / 10;    // 1 décimale
+  const r0  = Math.ceil(p.ref_qty);                 // entier supérieur
+  const okQ = (vq === r2 || vq === r1 || vq === r0);
+
+  // Commande : doit être exactement Math.ceil(quantité saisie / cond_unit)
+  // On accepte aussi Math.ceil(ref_qty / cond_unit) si la qty est correcte
+  const expectedCmd = Math.ceil(vq / p.cond_unit);
+  const expectedCmdRef = Math.ceil(p.ref_qty / p.cond_unit);
+  const okC = Number.isInteger(vc) && vc > 0 && (vc === expectedCmd || vc === expectedCmdRef);
+
+  const iq  = document.getElementById('ic3q_'+i);
+  const ic  = document.getElementById('ic3c_'+i);
+  const ir  = document.getElementById('ic3row_'+i);
+  const inQ = document.getElementById('q3q_'+i);
+  const inC = document.getElementById('q3c_'+i);
+
+  iq.textContent = okQ?'✅':'❌';
+  ic.textContent = okC?'✅':'❌';
+  inQ.classList.toggle('ok', okQ); inQ.classList.toggle('ko', !okQ);
+  inC.classList.toggle('ok', okC); inC.classList.toggle('ko', !okC);
+  ir.textContent = (okQ&&okC)?'✅':'❌';
+}
+
+// ── Valider étape 3 ────────────────────────────────────────────
+function validerEtape3(){
+  if(e3done) return;
+  totalPts += 5;
+  let sc=0;
+  PRODUITS3.forEach((p,i)=>{
+    if(p.prefill) return;
+    checkRow3(i);
+    const vq = +document.getElementById('q3q_'+i).value;
+    const vc = +document.getElementById('q3c_'+i).value;
+    const okQ = near(vq, p.ref_qty, 0.005);
+    const expectedCmd = Math.ceil(vq / p.cond_unit);
+    const expectedCmdRef = Math.ceil(p.ref_qty / p.cond_unit);
+    const okC = Number.isInteger(vc) && vc > 0 && (vc === expectedCmd || vc === expectedCmdRef);
+    if(okQ) sc+=0.42;
+    if(okC) sc+=0.42;
+  });
+  const pts = Math.min(5, Math.round(sc*10)/10);
+  earnedPts += pts;
+  const ok = pts >= 4.5;
+  const fb = document.getElementById('fb_etape3');
+  fb.style.display='flex'; fb.className='fb '+(ok?'ok':'ko');
+  fb.innerHTML=`<span class="fb-icon">${ok?'✅':'❌'}</span><span>${ok?'Toutes les quantités et commandes sont correctes !'
+    :'Certaines valeurs sont à revoir. Vérifiez votre méthode : Quantité totale = Quantité/m² (ratio) × votre surface nette. Pour la commande, pensez à arrondir à l\'unité supérieure selon le conditionnement.'}</span>`;
+  e3done = true;
+  updateScore();
+  if(e3done && e4done) showBilan();
+}
+
+// ── Données étape 4 ─────────────────────────────────────────────
+const PRODUITS4 = [
+  {nom:'Plaque de plâtre', u:'palette', prix:105.00, qte:1},
+  {nom:'Rail R48',         u:'paquet',  prix:26.80,  qte:1},
+  {nom:'Montant M48',      u:'paquet',  prix:45.20,  qte:2},
+  {nom:'Vis TTPC',         u:'boîte',   prix:14.80,  qte:1},
+  {nom:'Isolant laine min.', u:'rouleau', prix:38.50,  qte:2, prefill:true},
+  {nom:'Bande à joint',    u:'rouleau', prix:10.50,  qte:1},
+  {nom:'Enduit poudre PR', u:'sac',     prix:16.70,  qte:1},
+];
+const TOT_HT  = PRODUITS4.reduce((a,p)=>a+p.prix*p.qte, 0); // 264.20
+const COUT_R  = +(TOT_HT  * 1.075).toFixed(2);              // 284.02
+const PRIX_R  = +(COUT_R  * 1.32).toFixed(2);               // 374.90
+const PRIX_TTC= +(PRIX_R  * 1.10).toFixed(2);               // 412.39
+
+const COEFFS4 = { fc:1.075, fg:1.32, tva:1.10 };
+const COEFF_MSG4 = {
+  fc:  { ok:`✅ Correct ! Pour ajouter 7,5 %, coefficient = (1 + 0,075) = <strong>1,075</strong>.`,
+         ko:`❌ Rappel : pour ajouter p %, le coefficient = 1 + p/100. Ici p = 7,5. Essayez à nouveau.` },
+  fg:  { ok:`✅ Exact ! Pour ajouter 32 %, coefficient = (1 + 0,32) = <strong>1,32</strong>.`,
+         ko:`❌ Rappel : pour ajouter p %, le coefficient = 1 + p/100. Ici p = 32. Essayez à nouveau.` },
+  tva: { ok:`✅ Exact ! Pour ajouter 10 %, coefficient = (1 + 0,10) = <strong>1,10</strong>.`,
+         ko:`❌ Rappel : pour ajouter p %, le coefficient = 1 + p/100. Ici p = 10. Essayez à nouveau.` },
+};
+
+function checkCoeff4(key){
+  const idMap = {fc:'coeff_fc', fg:'coeff_fg', tva:'coeff_tva'};
+  const v = +document.getElementById(idMap[key]).value;
+  const ok = near(v, COEFFS4[key], 0.001);
+  setInpState(idMap[key], ok);
+  document.getElementById('icon_coeff_'+key).textContent = ok ? '✅' : '❌';
+  showFb('coeff_'+key, ok, COEFF_MSG4[key][ok?'ok':'ko']);
+}
+
+function checkCalc4(step){
+  const map = {
+    cr:  { inpA:'inp_cout_ht', inpC:'inp_coeff_fc', inpR:'res_cr',
+           refA:TOT_HT,  refC:COEFFS4.fc,  refR:COUT_R,
+           iconR:'icon_res_cr', fbR:'res_cr', synth:'syn-cr',
+           msgOk:`✅ Coût de réalisation calculé correctement ! (frais de chantier 7,5 % inclus).` },
+    pr:  { inpA:'inp_cr',     inpC:'inp_coeff_fg', inpR:'res_pr',
+           refA:COUT_R, refC:COEFFS4.fg,  refR:PRIX_R,
+           iconR:'icon_res_pr', fbR:'res_pr', synth:'syn-pr',
+           msgOk:`✅ Prix de revient HT calculé correctement ! (frais généraux 32 % inclus).` },
+    ttc: { inpA:'inp_pr',     inpC:'inp_coeff_tva',inpR:'res_ttc',
+           refA:PRIX_R, refC:COEFFS4.tva, refR:PRIX_TTC,
+           iconR:'icon_res_ttc', fbR:'res_ttc', synth:'syn-ttc',
+           msgOk:`✅ Prix TTC calculé correctement ! C'est le montant que paiera le client.` },
+  };
+  const d = map[step];
+  const vA = +document.getElementById(d.inpA).value;
+  const vC = +document.getElementById(d.inpC).value;
+  const vR = +document.getElementById(d.inpR).value;
+  const okA = near(vA, d.refA, 0.005);
+  const okC = near(vC, d.refC, 0.001);  // coefficient : tolérance fine maintenue
+  const okR = near(vR, d.refR, 0.005);
+  setInpState(d.inpA, okA); setInpState(d.inpC, okC); setInpState(d.inpR, okR);
+  document.getElementById(d.iconR).textContent = (okA&&okC&&okR) ? '✅' : '❌';
+  if(!okA)      showFb(d.fbR, false, `❌ La valeur de départ ne correspond pas au résultat de l'étape précédente. Reprenez votre calcul précédent.`);
+  else if(!okC) showFb(d.fbR, false, `❌ Coefficient incorrect. Rappel : pour ajouter p % → coefficient = 1 + p/100. Essayez à nouveau.`);
+  else if(!okR) showFb(d.fbR, false, `❌ Résultat incorrect. Vérifiez votre multiplication : valeur de départ × coefficient. Reprenez le calcul.`);
+  else {
+    showFb(d.fbR, true, d.msgOk);
+    document.getElementById(d.synth).textContent = fmt(d.refR);
+    if(step==='cr') document.getElementById('syn-ht').textContent = fmt(TOT_HT);
+  }
+}
+
+function buildTab4A(){
+  const tb = document.getElementById('tab4a-body');
+  PRODUITS4.forEach((p,i)=>{
+    const r = document.createElement('tr');
+    if(p.prefill){
+      const cost = p.prix * p.qte;
+      r.style.background = '#f0f4f8';
+      r.innerHTML=`<td class="lc" style="color:#666">${p.nom}</td>
+        <td style="color:#888">${p.u}</td>
+        <td style="color:#666">${fmt(p.prix)}</td>
+        <td style="color:#666">${p.qte}</td>
+        <td style="font-weight:600;color:var(--teal);text-align:center">${fmt(cost)}</td>
+        <td><span style="font-size:.75rem;color:#888;font-style:italic">ℹ pré-rempli</span></td>`;
+    } else {
+      r.innerHTML=`<td class="lc">${p.nom}</td><td>${p.u}</td><td>${fmt(p.prix)}</td><td>${p.qte}</td>
+        <td><div class="cell-wrap"><input type="number" id="c4_${i}" step="0.01" min="0"><span class="icon" id="ic4_${i}"></span></div></td>
+        <td><button class="btn-verif" onclick="checkLine4(${i})">✔</button></td>`;
+    }
+    tb.appendChild(r);
+  });
+  const rt = document.createElement('tr');
+  rt.className='tot-row';
+  rt.innerHTML=`<td class="lc" colspan="3">TOTAL HT matériaux</td><td></td>
+    <td><div class="cell-wrap"><input type="number" id="c4_tot" step="0.01" min="0"><span class="icon" id="ic4_tot"></span></div></td>
+    <td><button class="btn-verif" onclick="checkTot4()">✔</button></td>`;
+  tb.appendChild(rt);
+}
+
+function checkLine4(i){
+  if(PRODUITS4[i].prefill) return;
+  const ref = PRODUITS4[i].prix * PRODUITS4[i].qte;
+  const v = +document.getElementById('c4_'+i).value;
+  const ok = near(v, ref, 0.005);
+  setInpState('c4_'+i, ok);
+  document.getElementById('ic4_'+i).textContent = ok ? '✅' : '❌';
+}
+
+function checkTot4(){
+  const v = +document.getElementById('c4_tot').value;
+  const ok = near(v, TOT_HT, 0.005);
+  setInpState('c4_tot', ok);
+  document.getElementById('ic4_tot').textContent = ok ? '✅' : '❌';
+  showFb('ht_tot', ok,
+    ok ? `✅ Total HT correct ! (l'isolant pré-rempli est inclus) Passez à la partie B.`
+       : `❌ Résultat incorrect. Méthode : Coût = Quantité commandée × Prix unitaire. Attention aux articles avec une quantité > 1.`);
+  if(ok) document.getElementById('syn-ht').textContent = fmt(TOT_HT);
+}
+
+function setInpState(id, ok){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('ok', ok);
+  el.classList.toggle('ko', !ok);
+}
+
+function showFb(id, ok, msg){
+  const el = document.getElementById('fb_'+id);
+  if(!el) return;
+  el.style.display='flex'; el.className='fb '+(ok?'ok':'ko');
+  el.innerHTML=`<span class="fb-icon">${ok?'✅':'❌'}</span><span>${msg}</span>`;
+}
+
+function validerEtape4(){
+  if(e4done) return;
+  totalPts += 8;
+  PRODUITS4.forEach((_,i)=>checkLine4(i));
+  checkTot4();
+  checkCoeff4('fc'); checkCoeff4('fg'); checkCoeff4('tva');
+  checkCalc4('cr'); checkCalc4('pr'); checkCalc4('ttc');
+
+  const htOk  = PRODUITS4.every((p,i)=>p.prefill || near(+document.getElementById('c4_'+i).value, p.prix*p.qte, 0.005));
+  const totOk = near(+document.getElementById('c4_tot').value, TOT_HT, 0.005);
+  const cFc   = near(+document.getElementById('coeff_fc').value,  COEFFS4.fc,  .001);
+  const cFg   = near(+document.getElementById('coeff_fg').value,  COEFFS4.fg,  .001);
+  const cTva  = near(+document.getElementById('coeff_tva').value, COEFFS4.tva, .001);
+  const rCr   = near(+document.getElementById('res_cr').value,  COUT_R,  0.005);
+  const rPr   = near(+document.getElementById('res_pr').value,  PRIX_R,  0.005);
+  const rTtc  = near(+document.getElementById('res_ttc').value, PRIX_TTC, 0.005);
+
+  let pts = 0;
+  if(htOk && totOk) pts += 2; else if(totOk) pts += 1;
+  if(cFc  && rCr)   pts += 2; else if(rCr)   pts += 1;
+  if(cFg  && rPr)   pts += 2; else if(rPr)   pts += 1;
+  if(cTva && rTtc)  pts += 2; else if(rTtc)  pts += 1;
+  earnedPts += pts;
+
+  document.getElementById('syn-ht').textContent  = fmt(TOT_HT);
+  document.getElementById('syn-cr').textContent  = fmt(COUT_R);
+  document.getElementById('syn-pr').textContent  = fmt(PRIX_R);
+  document.getElementById('syn-ttc').textContent = fmt(PRIX_TTC);
+
+  const allOk = htOk && totOk && cFc && cFg && cTva && rCr && rPr && rTtc;
+  const fb4 = document.getElementById('fb_etape4');
+  fb4.style.display='flex'; fb4.className='fb '+(allOk?'ok':'ko');
+  fb4.innerHTML=`<span class="fb-icon">${allOk?'✅':'❌'}</span><span>${
+    allOk ? `Toute la chaîne des coûts est correcte ! Excellent travail.`
+          : `Certaines réponses sont à corriger. Consultez les feedbacks de chaque partie.`
+  }</span>`;
+  e4done = true;
+  updateScore();
+  if(e3done && e4done) showBilan();
+}
+
+// ── Bilan ──────────────────────────────────────────────────────
+function showBilan(){
+  const b = document.getElementById('bilan');
+  b.style.display='block';
+  document.getElementById('bilan-score').textContent = earnedPts.toFixed(1)+' / '+totalPts.toFixed(1)+' pts';
+  const pct = (earnedPts/totalPts)*100;
+  document.getElementById('bilan-msg').textContent = pct>=85
+    ? '🏆 Excellent ! Vous maîtrisez la chaîne des coûts du bâtiment.'
+    : pct>=60
+    ? '👍 Bon travail ! Quelques notions à consolider sur les coefficients multiplicateurs.'
+    : '📚 Des notions à revoir. Recommencez en relisant les rappels de chaque partie.';
+  b.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ── Reset ──────────────────────────────────────────────────────
+function resetAll(){
+  earnedPts=0; totalPts=0; e3done=false; e4done=false; SN_ELEVE=null;
+  document.querySelectorAll('input[type=number]').forEach(i=>{i.value='';i.classList.remove('ok','ko');i.style.borderColor='';i.style.background='';});
+  document.querySelectorAll('.icon,.icon-lg').forEach(e=>e.textContent='');
+  document.querySelectorAll('.fb').forEach(f=>f.style.display='none');
+  document.getElementById('bilan').style.display='none';
+  document.getElementById('icon-sn').textContent='';
+  document.getElementById('btn-sn').disabled=false;
+  // Reverrouiller les étapes
+  document.getElementById('lock3').style.display='flex';
+  document.getElementById('lock4').style.display='flex';
+  // Remettre les cellules surface à —
+  document.querySelectorAll('.sn-cell').forEach(td=>td.textContent='—');
+  document.getElementById('aide3-sn').textContent='—';
+  ['syn-ht','syn-cr','syn-pr','syn-ttc'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—'});
+  updateScore();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Init (appelé depuis startApp) ──────────────────────────────
+
+// ── Init (appelé depuis startApp) ──────────────────────────────
+</script>
+</body>
+</html>
